@@ -39,6 +39,24 @@
       <label>捐贈分會 <span class="req">*</span></label>
       <input type="text" id="chapter" placeholder="例如：台北市仁愛獅子會" required>
 
+      <label>專區 <span class="req">*</span></label>
+      <select id="zone" required>
+        <option value="">請選擇</option>
+        <option>第一專區</option>
+        <option>第二專區</option>
+        <option>第三專區</option>
+        <option>第四專區</option>
+        <option>第五專區</option>
+        <option>第六專區</option>
+        <option>第七專區</option>
+        <option>第八專區</option>
+        <option>第九專區</option>
+        <option>第十專區</option>
+        <option>第十一專區</option>
+        <option>第十二專區</option>
+        <option>第十三專區</option>
+      </select>
+
       <label>捐贈年度 <span class="req">*</span></label>
       <input type="text" id="year" inputmode="numeric" placeholder="民國年（例如：114）或獅子會年度（例如：2122）" required>
       <div class="hint">民國年填 114；獅子會年度填 2122（代表 21-22 年度）。</div>
@@ -123,6 +141,7 @@ document.getElementById('f').addEventListener('submit', function(e) {
   fetch(APP_API_URL, { method: 'POST', body: JSON.stringify({
     token: TOKEN,
     chapter: document.getElementById('chapter').value.trim(),
+    zone: document.getElementById('zone').value,
     year: document.getElementById('year').value.trim(),
     vehicle: vehicle,
     recipient: document.getElementById('recipient').value.trim(),
@@ -131,7 +150,7 @@ document.getElementById('f').addEventListener('submit', function(e) {
   })}).then(function(r){ return r.json(); }).then(function(d) {
     if (d.ok) {
       msg.className = 'ok';
-      msg.innerHTML = '✅ 已收到，謝謝！<br>「' + document.getElementById('chapter').value.trim() + '　' + document.getElementById('year').value.trim() + ' 年捐贈 ' + vehicle + '」已記錄，照片也已上傳。<br>有多筆紀錄，請按「再填一筆」分開填寫。';
+      msg.innerHTML = '✅ 已收到，謝謝！<br>「' + document.getElementById('chapter').value.trim() + '（' + document.getElementById('zone').value + '）　' + document.getElementById('year').value.trim() + ' 年捐贈 ' + vehicle + '」已記錄，照片也已上傳。<br>有多筆紀錄，請按「再填一筆」分開填寫。';
       document.getElementById('againBtn').style.display = 'block';
       btn.style.display = 'none';
     } else {

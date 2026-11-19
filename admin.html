@@ -41,7 +41,7 @@
         <button class="btn ghost" onclick="exportCSV()">匯出 CSV</button>
       </span>
     </div>
-    <div style="overflow-x:auto; margin-top: 12px;"><table id="tbl"><thead><tr><th>填寫時間</th><th>捐贈分會</th><th>年度</th><th>捐贈車輛</th><th>受贈單位</th><th>照片</th><th>備註</th><th></th></tr></thead><tbody></tbody></table></div>
+    <div style="overflow-x:auto; margin-top: 12px;"><table id="tbl"><thead><tr><th>填寫時間</th><th>捐贈分會</th><th>專區</th><th>年度</th><th>捐贈車輛</th><th>受贈單位</th><th>照片</th><th>備註</th><th></th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
 <script src="config.js"></script>
@@ -71,7 +71,7 @@ function load() {
     var tb = document.querySelector('#tbl tbody');
     tb.innerHTML = rows.map(function(r) {
       var photo = r.photo ? '<a href="' + esc(r.photo) + '" target="_blank"><img src="' + esc(r.photo) + '" alt="捐贈照片" onerror="this.style.display=\'none\'"></a><a href="' + esc(r.photo) + '" target="_blank">開照片</a>' : '（無）';
-      return '<tr><td data-th="填寫時間">' + esc(r.createdAt) + '</td><td data-th="捐贈分會">' + esc(r.chapter) + '</td><td data-th="年度">' + esc(r.year) + '</td><td data-th="捐贈車輛">' + esc(r.vehicle) + '</td><td data-th="受贈單位">' + esc(r.recipient) + '</td><td data-th="照片">' + photo + '</td><td data-th="備註">' + esc(r.note) + '</td><td><button class="btn danger" onclick="del(' + r.row + ')">刪除</button></td></tr>';
+      return '<tr><td data-th="填寫時間">' + esc(r.createdAt) + '</td><td data-th="捐贈分會">' + esc(r.chapter) + '</td><td data-th="專區">' + esc(r.zone) + '</td><td data-th="年度">' + esc(r.year) + '</td><td data-th="捐贈車輛">' + esc(r.vehicle) + '</td><td data-th="受贈單位">' + esc(r.recipient) + '</td><td data-th="照片">' + photo + '</td><td data-th="備註">' + esc(r.note) + '</td><td><button class="btn danger" onclick="del(' + r.row + ')">刪除</button></td></tr>';
     }).join('') || '<tr><td colspan="8">目前沒有資料。</td></tr>';
   });
 }
@@ -80,9 +80,9 @@ function del(row) {
   api({ action: 'delete', row: row }).then(function(d) { if (d.ok) load(); else alert('刪除失敗'); });
 }
 function exportCSV() {
-  var head = ['填寫時間','捐贈分會','捐贈年度','捐贈車輛','受贈單位','捐贈照片','備註'];
+  var head = ['填寫時間','捐贈分會','專區','捐贈年度','捐贈車輛','受贈單位','捐贈照片','備註'];
   var lines = [head.join(',')].concat(rows.map(function(r) {
-    return [r.createdAt, r.chapter, r.year, r.vehicle, r.recipient, r.photo, r.note].map(function(v) {
+    return [r.createdAt, r.chapter, r.zone, r.year, r.vehicle, r.recipient, r.photo, r.note].map(function(v) {
       v = String(v == null ? '' : v).replace(/"/g, '""'); return '"' + v + '"';
     }).join(',');
   }));
