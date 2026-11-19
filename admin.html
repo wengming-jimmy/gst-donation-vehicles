@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>捐車紀錄後台｜GST 八大志業</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: #fff0f6; color: #4a2b3a; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 20px; color: #c2185b; text-align: center; }
+  .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(214,51,132,.12); padding: 20px; margin-bottom: 16px; }
+  input, button { font-size: 15px; font-family: inherit; }
+  input[type=password] { width: 100%; padding: 11px 12px; border: 2px solid #f8bbd0; border-radius: 10px; }
+  .btn { padding: 11px 20px; border: none; border-radius: 999px; background: #ec407a; color: #fff; font-weight: bold; cursor: pointer; }
+  .btn.ghost { background: #fff; color: #c2185b; border: 2px solid #ec407a; }
+  .btn.danger { background: #fff; color: #c62828; border: 2px solid #ef9a9a; padding: 6px 14px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { border-bottom: 1px solid #f8bbd0; padding: 10px 8px; text-align: left; vertical-align: top; }
+  th { color: #c2185b; white-space: nowrap; }
+  td img { width: 120px; border-radius: 8px; display: block; }
+  .count { color: #8a5a70; font-size: 14px; }
+  #msg { margin-top: 10px; color: #c62828; }
+  @media (max-width: 640px) { table, thead, tbody, th, td, tr { display: block; } thead { display: none; } tr { border: 1px solid #f8bbd0; border-radius: 12px; margin-bottom: 12px; padding: 8px; } td { border: none; padding: 6px 4px; } td:before { content: attr(data-th); font-weight: bold; color: #c2185b; display: block; font-size: 13px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🚗 GST 捐車紀錄後台</h1>
+  <div class="card" id="loginCard">
+    <p>請輸入後台密碼（第一次使用請自設一組，之後用同一組登入）。</p>
+    <div class="row"><input type="password" id="pw" placeholder="後台密碼" style="flex:1; min-width:180px"><button class="btn" onclick="unlock()">進入後台</button></div>
+    <div id="msg"></div>
+  </div>
+  <div class="card" id="mainCard" style="display:none">
+    <div class="row" style="justify-content: space-between;">
+      <span class="count" id="count"></span>
+      <span class="row">
+        <button class="btn ghost" onclick="load()">重新載入</button>
+        <button class="btn ghost" onclick="exportCSV()">匯出 CSV</button>
+      </span>
+    </div>
+    <div style="overflow-x:auto; margin-top: 12px;"><table id="tbl"><thead><tr><th>填寫時間</th><th>捐贈分會</th><th>年度</th><th>捐贈車輛</th><th>受贈單位</th><th>照片</th><th>備註</th><th></th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+<script src="config.js"></script>
+<script>
+var KEY = 'gst_donation_admin_pw';
+var rows = [];
+function api(params) {
+  var q = new URLSearchParams(params); q.set('token', TOKEN);
+  return fetch(APP_API_URL + '?' + q.toString()).then(function(r){ return r.json(); });
+}
+function unlock() {
+  var pw = document.getElementById('pw').value;
+  if (!pw) { document.getElementById('msg').textContent = '請先輸入密碼。'; return; }
+  var saved = localStorage.getItem(KEY);
+  if (!saved) { localStorage.setItem(KEY, pw); }
+  else if (saved !== pw) { document.getElementById('msg').textContent = '密碼不正確。'; return; }
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('mainCard').style.display = 'block';
+  load();
+}
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function load() {
+  api({}).then(function(d) {
+    if (!d.ok) { alert('讀取失敗：' + (d.error || '')); return; }
+    rows = d.rows || [];
+    document.getElementById('count').textContent = '共 ' + rows.length + ' 筆';
+    var tb = document.querySelector('#tbl tbody');
+    tb.innerHTML = rows.map(function(r) {
+      var photo = r.photo ? '<a href="' + esc(r.photo) + '" target="_blank"><img src="' + esc(r.photo) + '" alt="捐贈照片" onerror="this.style.display=\'none\'"></a><a href="' + esc(r.photo) + '" target="_blank">開照片</a>' : '（無）';
+      return '<tr><td data-th="填寫時間">' + esc(r.createdAt) + '</td><td data-th="捐贈分會">' + esc(r.chapter) + '</td><td data-th="年度">' + esc(r.year) + '</td><td data-th="捐贈車輛">' + esc(r.vehicle) + '</td><td data-th="受贈單位">' + esc(r.recipient) + '</td><td data-th="照片">' + photo + '</td><td data-th="備註">' + esc(r.note) + '</td><td><button class="btn danger" onclick="del(' + r.row + ')">刪除</button></td></tr>';
+    }).join('') || '<tr><td colspan="8">目前沒有資料。</td></tr>';
+  });
+}
+function del(row) {
+  if (!confirm('確定刪除第 ' + row + ' 列嗎？照片檔案不會一併刪除，如需刪除請到 Drive 資料夾處理。')) return;
+  api({ action: 'delete', row: row }).then(function(d) { if (d.ok) load(); else alert('刪除失敗'); });
+}
+function exportCSV() {
+  var head = ['填寫時間','捐贈分會','捐贈年度','捐贈車輛','受贈單位','捐贈照片','備註'];
+  var lines = [head.join(',')].concat(rows.map(function(r) {
+    return [r.createdAt, r.chapter, r.year, r.vehicle, r.recipient, r.photo, r.note].map(function(v) {
+      v = String(v == null ? '' : v).replace(/"/g, '""'); return '"' + v + '"';
+    }).join(',');
+  }));
+  var blob = new Blob(["\ufeff" + lines.join("\n")], { type: 'text/csv' });
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'gst-donation-vehicles.csv'; a.click();
+}
+</script>
+</body>
+</html>

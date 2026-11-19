@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GST 八大志業捐車紀錄｜國際獅子會 300A-2 區</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background: linear-gradient(160deg, #fff0f6 0%, #ffe4ef 45%, #fdeef7 100%); min-height: 100vh; color: #4a2b3a; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 20px 16px 48px; }
+  .card { background: #fff; border-radius: 20px; box-shadow: 0 8px 30px rgba(214, 51, 132, .15); padding: 28px 22px; }
+  h1 { font-size: 22px; text-align: center; margin: 0 0 4px; color: #c2185b; }
+  .sub { text-align: center; color: #8a5a70; font-size: 14px; line-height: 1.7; margin: 0 0 20px; }
+  label { display: block; font-weight: bold; margin: 18px 0 6px; font-size: 15px; }
+  label .req { color: #e91e63; }
+  input[type=text], input[type=number], select, textarea { width: 100%; padding: 12px 14px; border: 2px solid #f8bbd0; border-radius: 12px; font-size: 16px; font-family: inherit; background: #fffafc; }
+  input:focus, textarea:focus { outline: none; border-color: #ec407a; }
+  textarea { min-height: 72px; resize: vertical; }
+  .hint { font-size: 13px; color: #a06a80; margin-top: 6px; line-height: 1.6; }
+  .photo-box { border: 2px dashed #f48fb1; border-radius: 12px; padding: 16px; text-align: center; background: #fff5f8; cursor: pointer; }
+  .photo-box img { max-width: 100%; max-height: 260px; border-radius: 10px; display: block; margin: 0 auto 8px; }
+  .photo-box .pick { display: inline-block; background: #ec407a; color: #fff; padding: 10px 22px; border-radius: 999px; font-weight: bold; font-size: 15px; }
+  .photo-box input { display: none; }
+  .submit { width: 100%; margin-top: 26px; padding: 15px; border: none; border-radius: 999px; background: linear-gradient(90deg, #ec407a, #f06292); color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; }
+  .submit:disabled { opacity: .6; }
+  .again { width: 100%; margin-top: 12px; padding: 13px; border: 2px solid #ec407a; border-radius: 999px; background: #fff; color: #c2185b; font-size: 16px; font-weight: bold; cursor: pointer; display: none; }
+  #msg { display: none; margin-top: 18px; padding: 14px; border-radius: 12px; font-size: 15px; line-height: 1.7; }
+  #msg.ok { display: block; background: #e8f5e9; color: #2e7d32; }
+  #msg.err { display: block; background: #fce4ec; color: #c62828; }
+  .footer { text-align: center; font-size: 13px; color: #b08a9a; margin-top: 22px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>🚗 GST 八大志業捐車紀錄</h1>
+    <p class="sub">國際獅子會 300A-2 區<br>彙整各分會歷年捐贈車輛的服務成果，<br>製作本年度 GST 八大志業社服活動看板</p>
+    <form id="f">
+      <label>捐贈分會 <span class="req">*</span></label>
+      <input type="text" id="chapter" placeholder="例如：台北市仁愛獅子會" required>
+
+      <label>捐贈年度 <span class="req">*</span></label>
+      <input type="text" id="year" inputmode="numeric" placeholder="民國年，例如：114" required>
+      <div class="hint">請填民國年，例如 114 年捐贈就填 114。</div>
+
+      <label>捐贈車輛 <span class="req">*</span></label>
+      <select id="vehicle" required>
+        <option value="">請選擇</option>
+        <option>消防車</option>
+        <option>救護車</option>
+        <option>防災車</option>
+        <option value="其他">其他</option>
+      </select>
+      <input type="text" id="vehicleOther" placeholder="請填寫車輛，例如：復康巴士、捐血車" style="display:none; margin-top:8px">
+
+      <label>受贈單位 <span class="req">*</span></label>
+      <input type="text" id="recipient" placeholder="例如：台北市政府社會局" required>
+
+      <label>捐贈照片 <span class="req">*</span></label>
+      <div class="photo-box" id="photoBox">
+        <img id="preview" style="display:none" alt="捐贈照片預覽">
+        <span class="pick" id="pickText">📷 選擇交車照片</span>
+        <div class="hint" id="photoHint">請附清晰的交車照片，建議能看見車輛及受贈單位。<br>每筆紀錄附一張照片；有多筆紀錄請分開填寫。</div>
+        <input type="file" id="photo" accept="image/*" required>
+      </div>
+
+      <label>備註（選填）</label>
+      <textarea id="note" placeholder="例如：捐贈典禮日期、車輛用途等"></textarea>
+
+      <button type="submit" class="submit" id="submitBtn">送出捐車紀錄</button>
+      <button type="button" class="again" id="againBtn">再填一筆</button>
+      <div id="msg"></div>
+    </form>
+    <p class="footer">每筆紀錄請分開填寫，並各附一張照片。<br>感謝大家協助，讓各分會的服務成果都能完整呈現！</p>
+  </div>
+</div>
+<script src="config.js"></script>
+<script>
+var photoData = null, photoName = '', photoMime = '';
+var vehicleSel = document.getElementById('vehicle');
+var vehicleOther = document.getElementById('vehicleOther');
+vehicleSel.addEventListener('change', function() {
+  var isOther = vehicleSel.value === '其他';
+  vehicleOther.style.display = isOther ? 'block' : 'none';
+  vehicleOther.required = isOther;
+  if (!isOther) vehicleOther.value = '';
+});
+function vehicleValue() {
+  return vehicleSel.value === '其他' ? vehicleOther.value.trim() : vehicleSel.value;
+}
+var box = document.getElementById('photoBox');
+var input = document.getElementById('photo');
+box.addEventListener('click', function(e) { if (e.target !== input) input.click(); });
+input.addEventListener('change', function() {
+  var file = input.files[0];
+  if (!file) return;
+  photoName = file.name; photoMime = file.type || 'image/jpeg';
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      var max = 1600, w = img.width, h = img.height;
+      if (w > max || h > max) { var s = Math.min(max / w, max / h); w = Math.round(w * s); h = Math.round(h * s); }
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      photoData = c.toDataURL('image/jpeg', 0.85).split(',')[1];
+      var pv = document.getElementById('preview');
+      pv.src = c.toDataURL('image/jpeg', 0.85); pv.style.display = 'block';
+      document.getElementById('pickText').textContent = '📷 已選照片，點一下可更換';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById('f').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var msg = document.getElementById('msg');
+  if (!photoData) { msg.className = 'err'; msg.textContent = '請先選擇一張捐贈照片。'; return; }
+  var vehicle = vehicleValue();
+  if (!vehicle) { msg.className = 'err'; msg.textContent = '請選擇或填寫捐贈車輛。'; return; }
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '上傳中，請稍候…';
+  fetch(APP_API_URL, { method: 'POST', body: JSON.stringify({
+    token: TOKEN,
+    chapter: document.getElementById('chapter').value.trim(),
+    year: document.getElementById('year').value.trim(),
+    vehicle: vehicle,
+    recipient: document.getElementById('recipient').value.trim(),
+    note: document.getElementById('note').value.trim(),
+    photoName: photoName, photoMime: photoMime, photoData: photoData
+  })}).then(function(r){ return r.json(); }).then(function(d) {
+    if (d.ok) {
+      msg.className = 'ok';
+      msg.innerHTML = '✅ 已收到，謝謝！<br>「' + document.getElementById('chapter').value.trim() + '　' + document.getElementById('year').value.trim() + ' 年捐贈 ' + vehicle + '」已記錄，照片也已上傳。<br>有多筆紀錄，請按「再填一筆」分開填寫。';
+      document.getElementById('againBtn').style.display = 'block';
+      btn.style.display = 'none';
+    } else {
+      msg.className = 'err'; msg.textContent = '送出失敗，請再試一次（' + (d.error || '未知錯誤') + '）。';
+      btn.disabled = false; btn.textContent = '送出捐車紀錄';
+    }
+  }).catch(function() {
+    msg.className = 'err'; msg.textContent = '網路連線失敗，請檢查網路後再試一次。';
+    btn.disabled = false; btn.textContent = '送出捐車紀錄';
+  });
+});
+document.getElementById('againBtn').addEventListener('click', function() { location.reload(); });
+</script>
+</body>
+</html>
