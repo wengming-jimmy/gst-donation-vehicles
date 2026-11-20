@@ -61,9 +61,9 @@
       <input type="text" id="year" inputmode="numeric" placeholder="民國年（例如：114）或獅子會年度（例如：2122）" required>
       <div class="hint">民國年填 114；獅子會年度填 2122（代表 21-22 年度）。</div>
 
-      <label>捐贈車輛 <span class="req">*</span></label>
-      <select id="vehicle" required>
-        <option value="">請選擇</option>
+      <label>捐贈車輛</label>
+      <select id="vehicle">
+        <option value="">請選擇（可先不填）</option>
         <option>消防車</option>
         <option>救護車</option>
         <option>防災車</option>
@@ -133,9 +133,8 @@ input.addEventListener('change', function() {
 document.getElementById('f').addEventListener('submit', function(e) {
   e.preventDefault();
   var msg = document.getElementById('msg');
-  if (!photoData) { msg.className = 'err'; msg.textContent = '請先選擇一張捐贈照片。'; return; }
   var vehicle = vehicleValue();
-  if (!vehicle) { msg.className = 'err'; msg.textContent = '請選擇或填寫捐贈車輛。'; return; }
+  if (!photoData) { msg.className = 'err'; msg.textContent = '請先選擇一張捐贈照片。'; return; }
   var btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = '上傳中，請稍候…';
   fetch(APP_API_URL, { method: 'POST', body: JSON.stringify({
@@ -150,7 +149,7 @@ document.getElementById('f').addEventListener('submit', function(e) {
   })}).then(function(r){ return r.json(); }).then(function(d) {
     if (d.ok) {
       msg.className = 'ok';
-      msg.innerHTML = '✅ 已收到，謝謝！<br>「' + document.getElementById('chapter').value.trim() + '（' + document.getElementById('zone').value + '）　' + document.getElementById('year').value.trim() + ' 年捐贈 ' + vehicle + '」已記錄，照片也已上傳。<br>有多筆紀錄，請按「再填一筆」分開填寫。';
+      msg.innerHTML = '✅ 已收到，謝謝！<br>「' + document.getElementById('chapter').value.trim() + '（' + document.getElementById('zone').value + '）　' + document.getElementById('year').value.trim() + ' 年' + (vehicle ? '捐贈 ' + vehicle : '的捐車紀錄') + '」已記錄，照片也已上傳。<br>有多筆紀錄，請按「再填一筆」分開填寫。';
       document.getElementById('againBtn').style.display = 'block';
       btn.style.display = 'none';
     } else {
